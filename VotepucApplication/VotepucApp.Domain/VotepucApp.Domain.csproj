@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>Domain</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Remove="Entities\Eleicao\**" />
+      <Compile Include="VoteLink\Messages\Constants\ConstantsVoteLinkBusinessRule.cs" />
+      <Compile Include="VoteLink\Messages\Constants\ConstantsVoteLinkSuccess.cs" />
+      <Compile Include="VoteLink\Messages\Constants\ConstantsVoteLinkValidation.cs" />
+      <Compile Include="VoteLink\Messages\VoteLinkSuccess.cs" />
+      <Compile Remove="User\UserValidations.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Entities\Eleicao\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Entities\Eleicao\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="OneOf" Version="3.0.271" />
+    </ItemGroup>
+
+</Project>

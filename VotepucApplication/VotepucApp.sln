@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "VotepucApp.Core", "VotepucApp.Core", "{90133A88-60F4-42FC-8113-F0CB837BFBB7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "VotepucApp.Infrastructure", "VotepucApp.Infrastructure", "{6252CDFF-45BB-424C-99A8-5B9EBDEB1681}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "VotepucApp.Presentation", "VotepucApp.Presentation", "{4D082E1B-F947-4B6C-89E7-E3D2AE13455A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VotepucApp.Domain", "VotepucApp.Domain\VotepucApp.Domain.csproj", "{E31737F8-88EC-4E2F-BD30-C047E196A2D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VotepucApp.Application", "VotepucApp.Application\VotepucApp.Application.csproj", "{07AF2EA4-C172-46BE-A45A-6C44F80738BC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VotepucApp.Persistence", "VotepucApp.Persistence\VotepucApp.Persistence.csproj", "{ADE7F839-D7A5-400B-9829-8545559AE120}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E31737F8-88EC-4E2F-BD30-C047E196A2D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E31737F8-88EC-4E2F-BD30-C047E196A2D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E31737F8-88EC-4E2F-BD30-C047E196A2D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E31737F8-88EC-4E2F-BD30-C047E196A2D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07AF2EA4-C172-46BE-A45A-6C44F80738BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07AF2EA4-C172-46BE-A45A-6C44F80738BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07AF2EA4-C172-46BE-A45A-6C44F80738BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07AF2EA4-C172-46BE-A45A-6C44F80738BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ADE7F839-D7A5-400B-9829-8545559AE120}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADE7F839-D7A5-400B-9829-8545559AE120}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADE7F839-D7A5-400B-9829-8545559AE120}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADE7F839-D7A5-400B-9829-8545559AE120}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E31737F8-88EC-4E2F-BD30-C047E196A2D3} = {90133A88-60F4-42FC-8113-F0CB837BFBB7}
+		{07AF2EA4-C172-46BE-A45A-6C44F80738BC} = {90133A88-60F4-42FC-8113-F0CB837BFBB7}
+		{ADE7F839-D7A5-400B-9829-8545559AE120} = {6252CDFF-45BB-424C-99A8-5B9EBDEB1681}
+	EndGlobalSection
+EndGlobal
