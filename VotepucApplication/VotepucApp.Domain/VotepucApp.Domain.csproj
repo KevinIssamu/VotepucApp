@@ -9,10 +9,6 @@
 
     <ItemGroup>
       <Compile Remove="Entities\Eleicao\**" />
-      <Compile Include="VoteLink\Messages\Constants\ConstantsVoteLinkBusinessRule.cs" />
-      <Compile Include="VoteLink\Messages\Constants\ConstantsVoteLinkSuccess.cs" />
-      <Compile Include="VoteLink\Messages\Constants\ConstantsVoteLinkValidation.cs" />
-      <Compile Include="VoteLink\Messages\VoteLinkSuccess.cs" />
       <Compile Remove="User\UserValidations.cs" />
     </ItemGroup>
 
@@ -25,6 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="MediatR.Contracts" Version="2.0.1" />
       <PackageReference Include="OneOf" Version="3.0.271" />
     </ItemGroup>
 

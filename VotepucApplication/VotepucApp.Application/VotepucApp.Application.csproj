@@ -10,4 +10,13 @@
       <ProjectReference Include="..\VotepucApp.Domain\VotepucApp.Domain.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Cases\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
+      <PackageReference Include="MediatR" Version="12.4.1" />
+    </ItemGroup>
+
 </Project>

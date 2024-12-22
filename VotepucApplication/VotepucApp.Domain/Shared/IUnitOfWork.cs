@@ -1,6 +1,6 @@
 namespace Domain.Shared;
 
-internal interface IUnitOfWork
+public interface IUnitOfWork
 {
-    Task<int> CommitAsync(CancellationToken cancellationToken);
+    Task CommitAsync(CancellationToken cancellationToken);
 }

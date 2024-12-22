@@ -1,3 +1,7 @@
+using Domain.Shared.Events;
+using Domain.Shared.Events.EventsStatus;
+using MediatR;
+
 namespace Domain.Shared;
 
 public abstract class BaseEntity

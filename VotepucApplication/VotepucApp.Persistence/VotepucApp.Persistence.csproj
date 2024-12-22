@@ -7,16 +7,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Remove="Context\**" />
       <Compile Remove="Class1.cs" />
     </ItemGroup>
 
     <ItemGroup>
-      <EmbeddedResource Remove="Context\**" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.11" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.11" />
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="Context\**" />
+      <ProjectReference Include="..\VotepucApp.Application\VotepucApp.Application.csproj" />
     </ItemGroup>
 
 </Project>
