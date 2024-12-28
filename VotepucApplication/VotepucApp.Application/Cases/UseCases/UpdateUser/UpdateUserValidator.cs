@@ -8,6 +8,5 @@ public class UpdateUserValidator : AbstractValidator<UpdateUserRequest>
     {
         RuleFor(x => x.UserRequestUpdated.Email).EmailAddress().NotEmpty();
         RuleFor(x => x.UserRequestUpdated.UserName).NotEmpty();
-        RuleFor(x => x.UserRequestUpdated.UserType).NotEmpty();
     }
 }

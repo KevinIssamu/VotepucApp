@@ -2,6 +2,7 @@ using Domain.ElectionAggregate.Election.Constants;
 using Domain.ElectionAggregate.Election.Enumerations;
 using Domain.Shared.AppError;
 using Domain.Shared.AppSuccess;
+using Domain.UserAggregate.User;
 using OneOf;
 
 namespace Domain.ElectionAggregate.Election;
@@ -18,6 +19,11 @@ public class PendingElection : Election
 
         Title = newTitle;
         return new AppSuccess("Title updated successfully.");
+    }
+
+    public void SetParticipants(List<Participant.Participant> newParticipants)
+    {
+        Participants = newParticipants;
     }
 
     public OneOf<AppSuccess, AppError> SetDescription(string newDescription)
@@ -39,9 +45,9 @@ public class PendingElection : Election
         if (string.IsNullOrWhiteSpace(newInviteEmailText))
             return new AppError("Invite email text cannot be null or whitespace.",
                 AppErrorTypeEnum.BusinessRuleValidationFailure);
-        if (newInviteEmailText.Length > ConstantsElectionValidations.EmailInvitationText)
+        if (newInviteEmailText.Length > ConstantsElectionValidations.EmailInvitationTextMaxLength)
             return new AppError(
-                $"Invite email text cannot exceed {ConstantsElectionValidations.EmailInvitationText} characters.",
+                $"Invite email text cannot exceed {ConstantsElectionValidations.EmailInvitationTextMaxLength} characters.",
                 AppErrorTypeEnum.BusinessRuleValidationFailure);
 
         EmailInvitationText = newInviteEmailText;
@@ -73,8 +79,8 @@ public class PendingElection : Election
 
     public OneOf<AppSuccess, AppError> Approve()
     {
-        if (Status == ElectionStatusEnum.Rejected)
-            return new AppError("Cannot approve an election that has been rejected.",
+        if (Status != ElectionStatusEnum.Pending)
+            return new AppError($"election with {Status} status cannot be approved.",
                 AppErrorTypeEnum.BusinessRuleValidationFailure);
 
         Status = ElectionStatusEnum.Approved;
@@ -100,7 +106,8 @@ public class PendingElection : Election
             bool multiVote,
             DateTimeOffset startDate,
             DateTimeOffset endDate,
-            ICollection<Participant.Participant> participants)
+            ICollection<Participant.Participant>? participants,
+            User owner)
         {
             if (string.IsNullOrWhiteSpace(title))
                 return new AppError("Title cannot be null or whitespace.",
@@ -110,10 +117,6 @@ public class PendingElection : Election
                     AppErrorTypeEnum.BusinessRuleValidationFailure);
             if (string.IsNullOrWhiteSpace(emailInvitationText))
                 return new AppError("Email invitation text cannot be null or whitespace.",
-                    AppErrorTypeEnum.BusinessRuleValidationFailure);
-
-            if (participants.Count == 0)
-                return new AppError("An election must have at least one participant.",
                     AppErrorTypeEnum.BusinessRuleValidationFailure);
 
             if (endDate < DateTimeOffset.Now)
@@ -132,6 +135,8 @@ public class PendingElection : Election
                 StartDate = startDate,
                 Status = ElectionStatusEnum.Pending,
                 Progress = ElectionProgressEnum.Inactive,
+                OwnerId = owner.Id,
+                Owner = owner,
                 EndDate = endDate,
                 Participants = participants,
                 CreateAt = DateTimeOffset.Now

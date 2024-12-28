@@ -1,4 +1,5 @@
 using Domain.Shared;
+using Domain.Shared.Interfaces;
 using VotepucApp.Persistence.Context;
 
 namespace VotepucApp.Persistence.Repositories;

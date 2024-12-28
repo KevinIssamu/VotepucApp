@@ -2,6 +2,7 @@ using Domain.ElectionAggregate.Election;
 using Domain.Shared;
 using Domain.Shared.AppError;
 using Domain.Shared.AppSuccess;
+using Domain.Shared.Interfaces;
 using OneOf;
 using VotepucApp.Application.Cases.UseCases.CreateUser;
 using VotepucApp.Application.Cases.UseCases.SelectUser.Requests;
@@ -13,9 +14,7 @@ namespace VotepucApp.Application.BusinessService;
 
 public interface IService<T> where T : IAggregateRoot
 {
-    Task<OneOf<T, AppError>> CreateAsync(CreateUserRequest createUserRequest, CancellationToken cancellationToken);
-    Task<OneOf<T, AppError>> SelectByIdAsync(SelectUserByIdRequest<UserResponse> createUserRequest, CancellationToken cancellationToken);
-    Task<OneOf<List<T>, AppError>> SelectPaginatedAsync(SelectUsersRequest request, CancellationToken cancellationToken);
-    Task<OneOf<AppSuccess, AppError>> DeleteAsync(SelectUserByIdRequest<OperationUserResponse> request, CancellationToken cancellationToken);
-    Task<OneOf<AppSuccess, AppError>> UpdateAsync(UpdateUserRequest request, CancellationToken cancellationToken);
+    Task<OneOf<T, AppError>> SelectByIdAsync(Guid id, CancellationToken cancellationToken);
+    Task<OneOf<List<T>, AppError>> SelectPaginatedAsync(int skip, int top, CancellationToken cancellationToken);
+    OneOf<AppSuccess, AppError> Delete(T entity, CancellationToken cancellationToken);
 }

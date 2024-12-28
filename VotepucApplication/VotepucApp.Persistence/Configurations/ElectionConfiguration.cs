@@ -31,7 +31,7 @@ public class ElectionConfiguration : IEntityTypeConfiguration<Election>
             .IsRequired();
 
         builder.Property(x => x.EmailInvitationText)
-            .HasMaxLength(ConstantsElectionValidations.EmailInvitationText)
+            .HasMaxLength(ConstantsElectionValidations.EmailInvitationTextMaxLength)
             .IsRequired();
 
         builder.Property(x => x.Progress)

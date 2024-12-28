@@ -1,5 +1,6 @@
 using Domain.ElectionAggregate.Election.Enumerations;
 using Domain.Shared;
+using Domain.Shared.Interfaces;
 using Domain.UserAggregate.User;
 
 namespace Domain.ElectionAggregate.Election;
@@ -14,10 +15,14 @@ public abstract class Election : BaseEntity, IAggregateRoot
     public DateTimeOffset EndDate { get; protected set; }
     public ElectionStatusEnum Status { get; protected set; }
     public ElectionProgressEnum Progress { get; protected set; }
-    public Guid OwnerId { get; init; }
+    public string OwnerId { get; init; }
     public User Owner { get; init; }
-    public ICollection<Participant.Participant> Participants { get; protected set; }
-    public ICollection<VoteLink.VoteLink> VoteLinks { get; protected set; }
+    public ICollection<Participant.Participant>? Participants { get; protected set; }
+    public ICollection<VoteLink.VoteLink>? VoteLinks { get; protected set; }
 
+    public int Addnumber(int n, int n2)
+    {
+        return n + n2;
+    }
     public Election() { }
 }

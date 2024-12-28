@@ -1,9 +1,12 @@
 using Domain.ElectionAggregate.Election;
 using Domain.Shared;
+using Domain.Shared.Interfaces;
 using Domain.UserAggregate.User;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using VotepucApp.Application.AuthenticationsServices;
+using VotepucApp.Application.AuthenticationsServices.Interfaces;
 using VotepucApp.Persistence.Context;
 using VotepucApp.Persistence.Repositories;
 
@@ -20,5 +23,6 @@ public static class ServiceExtensions
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserRepository, UserAggregateRepository>();
         services.AddScoped<IElectionRepository, ElectionAggregateRepository>();
+        services.AddScoped<ITokenService, TokenService>();
     }
 }

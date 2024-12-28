@@ -2,6 +2,7 @@ using Domain.ElectionAggregate.Election;
 using Domain.Shared;
 using Domain.Shared.AppError;
 using Domain.Shared.AppSuccess;
+using Domain.Shared.Interfaces;
 using Domain.UserAggregate.User;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
@@ -35,7 +36,7 @@ public class UserAggregateRepository(AppDbContext context, ReadDbContext readDbC
     {
         try
         {
-            var userResult = await readDbContext.Users.FirstOrDefaultAsync(e => e.Id == id, cancellationToken: cancellationToken);
+            var userResult = await readDbContext.Users.FirstOrDefaultAsync(e => e.Id == id.ToString(), cancellationToken: cancellationToken);
 
             return userResult;
         }
@@ -63,7 +64,7 @@ public class UserAggregateRepository(AppDbContext context, ReadDbContext readDbC
     {
         try
         {
-            var userResult = await readDbContext.Users.Where(x => x.Id == userId)
+            var userResult = await readDbContext.Users.Where(x => x.Id == userId.ToString())
                 .SelectMany(x => x.Elections!)
                 .Skip(skip)
                 .Take(take).ToListAsync(cancellationToken: cancellationToken);

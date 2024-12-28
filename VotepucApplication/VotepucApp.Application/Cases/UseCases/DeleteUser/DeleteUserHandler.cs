@@ -1,22 +1,26 @@
-using Domain.UserAggregate.User;
+using Domain.Shared.AppError;
 using MediatR;
-using VotepucApp.Application.BusinessService;
-using VotepucApp.Application.Cases.UseCases.SelectUser.Requests;
+using VotepucApp.Application.BusinessService.UserService;
+using VotepucApp.Application.Cases.Shared;
 using VotepucApp.Application.Cases.UseCases.Shared.Requests;
-using VotepucApp.Application.Cases.UseCases.Shared.Responses;
 
 namespace VotepucApp.Application.Cases.UseCases.DeleteUser;
 
 public class DeleteUserHandler(IUserService userService)
-    : IRequestHandler<SelectUserByIdRequest<OperationUserResponse>, OperationUserResponse>
+    : IRequestHandler<SelectUserByIdRequest<GenericResponse>, GenericResponse>
 {
-    public async Task<OperationUserResponse> Handle(SelectUserByIdRequest<OperationUserResponse> request,
+    public async Task<GenericResponse> Handle(SelectUserByIdRequest<GenericResponse> request,
         CancellationToken cancellationToken)
     {
-        var deleteUserResult = await userService.DeleteAsync(request, cancellationToken);
+        var deleteUserResult = await userService.Delete(request.Id, cancellationToken);
 
-        return deleteUserResult.IsT1
-            ? new OperationUserResponse(null, deleteUserResult.AsT1)
-            : new OperationUserResponse(deleteUserResult.AsT0, null);
+        if (deleteUserResult.IsT1)
+        {
+            return deleteUserResult.AsT1.Type == AppErrorTypeEnum.SystemError
+                ? new GenericResponse(500, deleteUserResult.AsT1.Message)
+                : new GenericResponse(404, deleteUserResult.AsT1.Message);
+        }
+        
+        return new GenericResponse(200, deleteUserResult.AsT0.Message);
     }
 }

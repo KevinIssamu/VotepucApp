@@ -2,104 +2,50 @@ using Domain.ElectionAggregate.Election;
 using Domain.Shared;
 using Domain.Shared.AppError;
 using Domain.Shared.AppError.Constants;
+using Domain.Shared.Constants;
+using Domain.Shared.Interfaces;
 using Domain.Shared.SharedValidators;
-using Domain.UserAggregate.User.Enumerations;
+using Microsoft.AspNetCore.Identity;
 using OneOf;
 
 namespace Domain.UserAggregate.User;
 
-public class User : BaseEntity, IAggregateRoot
+public class User : IdentityUser, IAggregateRoot
 {
-    public string Name { get; private set; }
-    public string Email { get; private set; }
-    public string PasswordHash { get; private set; }
-    public TypeOfUserEnum TypeOfUser { get; private set; }
+    public string? RefreshToken { get; set; }
+    public DateTime RefreshTokenExpiryTime { get; set; }
     public ICollection<Election>? Elections { get; private set; }
-
-    public bool SetName(string name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            return false;
-        }
-
-        if (name.Length >= ConstantsMaxLength.PersonNameMaxLength)
-        {
-            return false;
-        }
-
-        Name = name;
-        UpdatedAt = DateTime.Now;
-
-        return true;
-    }
-
-    public bool SetEmail(string email)
-    {
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            return false;
-        }
-
-        if (email.Length >= ConstantsMaxLength.PersonEmailMaxLength)
-        {
-            return false;
-        }
-
-        Email = email;
-        UpdatedAt = DateTimeOffset.Now;
-
-        return true;
-    }
-
-    public bool SetPassword(string password)
-    {
-        if (string.IsNullOrWhiteSpace(password))
-        {
-            return false;
-        }
-
-        PasswordHash = password;
-        UpdatedAt = DateTimeOffset.Now;
-
-        return true;
-    }
-
-    public bool SetUserType(TypeOfUserEnum typeOfUser)
-    {
-        TypeOfUser = typeOfUser;
-        UpdatedAt = DateTimeOffset.Now;
-
-        return true;
-    }
+    public DateTimeOffset CreateAt { get; init; }
+    public DateTimeOffset? UpdatedAt { get; set; }
 
     public static class Factory
     {
-        public static OneOf<User, AppError> Create(string name, string email, string passwordHash,
+        public static OneOf<User, AppError> Create(string name, string email, string password,
             ICollection<Election>? elections)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return new AppError("Name cannot be null or empty", AppErrorTypeEnum.BusinessRuleValidationFailure);
             if (string.IsNullOrWhiteSpace(email))
                 return new AppError("Email cannot be null or empty", AppErrorTypeEnum.BusinessRuleValidationFailure);
-            if (string.IsNullOrWhiteSpace(passwordHash))
+            if (string.IsNullOrWhiteSpace(password))
                 return new AppError("Password cannot be null or empty", AppErrorTypeEnum.BusinessRuleValidationFailure);
 
-            if (!GenericInvalidEmailValidator.IsValidEmail(email))
-                return new AppError("Invalid email address.", AppErrorTypeEnum.BusinessRuleValidationFailure);
-
-            if (name.Length > ConstantsMaxLength.PersonNameMaxLength)
-                return new AppError($"Name cannot exceed {ConstantsMaxLength.PersonNameMaxLength} characters.",
-                    AppErrorTypeEnum.BusinessRuleValidationFailure);
-
-            return new User()
+            return name.Length switch
             {
-                Id = Guid.NewGuid(),
-                Name = name,
-                Email = email,
-                PasswordHash = passwordHash,
-                TypeOfUser = TypeOfUserEnum.Common,
-                CreateAt = DateTimeOffset.Now
+                > LengthProperties.PersonNameMaxLength => new AppError(
+                    $"Name cannot exceed {LengthProperties.PersonNameMaxLength} characters.",
+                    AppErrorTypeEnum.BusinessRuleValidationFailure),
+                < LengthProperties.PersonNameMinLength => new AppError(
+                    $"Name must contain at least {LengthProperties.PersonNameMinLength} characters.",
+                    AppErrorTypeEnum.BusinessRuleValidationFailure),
+                _ => new User()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    UserName = name,
+                    Email = email,
+                    PasswordHash = password,
+                    CreateAt = DateTimeOffset.Now
+                }
             };
         }
     }

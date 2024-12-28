@@ -1,6 +1,7 @@
 using Domain.ElectionAggregate.Participant;
 using Domain.ElectionAggregate.Participant.Enumerations;
 using Domain.Shared.AppError.Constants;
+using Domain.Shared.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -25,11 +26,11 @@ public class ParticipantConfiguration : IEntityTypeConfiguration<Participant>
             .IsRequired();
 
         builder.Property(x => x.Name)
-            .HasMaxLength(ConstantsMaxLength.PersonNameMaxLength)
+            .HasMaxLength(LengthProperties.PersonNameMaxLength)
             .IsRequired();
 
         builder.Property(x => x.Email)
-            .HasMaxLength(ConstantsMaxLength.PersonEmailMaxLength)
+            .HasMaxLength(LengthProperties.PersonEmailMaxLength)
             .IsRequired();
         
         builder.Property(x => x.TypeOfParticipant)

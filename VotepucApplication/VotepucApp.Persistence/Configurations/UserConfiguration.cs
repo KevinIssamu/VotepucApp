@@ -1,4 +1,5 @@
 using Domain.Shared.AppError.Constants;
+using Domain.Shared.Constants;
 using Domain.UserAggregate.User;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -17,12 +18,12 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .ValueGeneratedOnAdd()
             .IsRequired();
         
-        builder.Property(x => x.Name)
-            .HasMaxLength(ConstantsMaxLength.PersonNameMaxLength)
+        builder.Property(x => x.UserName)
+            .HasMaxLength(LengthProperties.PersonNameMaxLength)
             .IsRequired();
 
         builder.Property(x => x.Email)
-            .HasMaxLength(ConstantsMaxLength.PersonEmailMaxLength)
+            .HasMaxLength(LengthProperties.PersonEmailMaxLength)
             .IsRequired();
 
         builder.HasIndex(x => x.Email)
@@ -31,8 +32,5 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(x => x.PasswordHash)
             .IsRequired();
         
-        builder.Property(x => x.TypeOfUser)
-            .HasConversion<string>()
-            .IsRequired();
     }
 }

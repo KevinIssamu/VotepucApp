@@ -3,6 +3,7 @@ using Domain.ElectionAggregate.Participant.Enumerations;
 using Domain.Shared.AppError;
 using Domain.Shared.AppError.Constants;
 using Domain.Shared.AppSuccess;
+using Domain.Shared.Constants;
 using Domain.Shared.SharedValidators;
 using OneOf;
 
@@ -27,14 +28,11 @@ public class Candidate : Participant
     {
         public static OneOf<Candidate, AppError> Create(string email, string name, Election.Election election)
         {
-            if (!GenericInvalidEmailValidator.IsValidEmail(email))
-                return new AppError("Invalid email address.", AppErrorTypeEnum.BusinessRuleValidationFailure);
-
             if (string.IsNullOrWhiteSpace(name))
                 return new AppError("Name cannot be null or empty.", AppErrorTypeEnum.BusinessRuleValidationFailure);
 
-            if (name.Length > ConstantsMaxLength.PersonNameMaxLength)
-                return new AppError($"Name cannot exceed {ConstantsMaxLength.PersonNameMaxLength} characters.",
+            if (name.Length > LengthProperties.PersonNameMaxLength)
+                return new AppError($"Name cannot exceed {LengthProperties.PersonNameMaxLength} characters.",
                     AppErrorTypeEnum.BusinessRuleValidationFailure);
 
             return new Candidate

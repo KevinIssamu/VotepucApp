@@ -25,19 +25,5 @@ public class VoteLinkConfiguration : IEntityTypeConfiguration<VoteLink>
         
         builder.Property(x => x.Token)
             .IsRequired();
-        
-        builder.Property(x => x.ExpirationDate)
-            .IsRequired();
-
-        builder.Property(x => x.WasUtilized)
-            .IsRequired();
-        
-        builder.Property(x => x.Status)
-            .HasConversion<string>()
-            .IsRequired();
-
-        builder.HasDiscriminator<VoteLinkStatusEnum>("VoteLinkStatus")
-            .HasValue<InactiveVoteLink>(VoteLinkStatusEnum.Inactive)
-            .HasValue<ActiveVoteLink>(VoteLinkStatusEnum.Active);
     }
 }

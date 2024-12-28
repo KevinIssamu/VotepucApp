@@ -11,12 +11,26 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Cases\" />
+      <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
+      <PackageReference Include="MediatR" Version="12.4.1" />
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
-      <PackageReference Include="MediatR" Version="12.4.1" />
+      <Compile Remove="Cases\lctionCass\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Cases\lctionCass\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Cases\lctionCass\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Cases\ElectionCases\DeleteElection\" />
+      <Folder Include="Cases\ElectionCases\SelectElection\Validators\" />
     </ItemGroup>
 
 </Project>

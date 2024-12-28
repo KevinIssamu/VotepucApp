@@ -1,7 +1,9 @@
 using Domain.ElectionAggregate.Election;
+using Domain.ElectionAggregate.Participant;
 using Domain.Shared;
 using Domain.Shared.AppError;
 using Domain.Shared.AppSuccess;
+using Domain.Shared.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
 using VotepucApp.Persistence.Context;
@@ -12,7 +14,8 @@ namespace VotepucApp.Persistence.Repositories;
 //Pretendo trocar o ORM e por isso estou utilizando repository
 public class ElectionAggregateRepository(AppDbContext context, ReadDbContext readDbContext) : IElectionRepository
 {
-    public async Task<OneOf<List<Election>, AppError>> SelectPaginatedAsync(int top, int skip, CancellationToken cancellationToken)
+    public async Task<OneOf<List<Election>, AppError>> SelectPaginatedAsync(int top, int skip,
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -48,7 +51,8 @@ public class ElectionAggregateRepository(AppDbContext context, ReadDbContext rea
         }
     }
 
-    public async Task<OneOf<AppSuccess, AppError>> CreateAsync(Election aggregateRoot, CancellationToken cancellationToken)
+    public async Task<OneOf<AppSuccess, AppError>> CreateAsync(Election aggregateRoot,
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -83,9 +87,36 @@ public class ElectionAggregateRepository(AppDbContext context, ReadDbContext rea
         try
         {
             context.Elections.Remove(aggregateRoot);
-            context.SaveChanges();
 
             return new AppSuccess("Election deleted successfully");
+        }
+        catch (Exception e)
+        {
+            return new AppError(e.Message, AppErrorTypeEnum.SystemError);
+        }
+    }
+
+    public async Task<OneOf<List<Participant>, AppError>> SelectElectionParticipants(Guid electionId,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await readDbContext.Participants.Where(p => p.ElectionId == electionId)
+                .ToListAsync(cancellationToken: cancellationToken);
+        }
+        catch (Exception e)
+        {
+            return new AppError(e.Message, AppErrorTypeEnum.SystemError);
+        }
+    }
+
+    public async Task<OneOf<int, AppError>> CountElectionParticipants(Guid electionId,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await readDbContext.Participants.Where(p => p.ElectionId == electionId)
+                .CountAsync(cancellationToken: cancellationToken);
         }
         catch (Exception e)
         {

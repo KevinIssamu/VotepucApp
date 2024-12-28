@@ -1,4 +1,5 @@
 using Domain.Shared.AppError.Constants;
+using Domain.Shared.Constants;
 using FluentValidation;
 using VotepucApp.Application.Cases.UseCases.SelectUser.Requests;
 
@@ -8,8 +9,6 @@ public sealed class SelectUserByEmailValidator : AbstractValidator<SelectUserByE
 {
     public SelectUserByEmailValidator()
     {
-        RuleFor(e => e.Email).NotEmpty()
-            .MaximumLength(ConstantsMaxLength.PersonEmailMaxLength)
-            .EmailAddress();
+        RuleFor(e => e.Email).EmailAddress();
     }
 }
