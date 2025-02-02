@@ -6,12 +6,14 @@ using OneOf;
 using VotepucApp.Application.Cases.UseCases.CreateUser;
 using VotepucApp.Application.Cases.UseCases.SelectUser.Requests;
 using VotepucApp.Application.Cases.UseCases.UpdateUser;
+using VotepucApp.Services.Interfaces;
 
 namespace VotepucApp.Application.BusinessService.UserService;
 
 public interface IUserService : IService<User>
 {
     Task<OneOf<List<Election>, AppError>> SelectUserElectionsAsync(SelectUserElectionsRequest request, CancellationToken cancellationToken);
+    Task<OneOf<User, AppError>> SelectUserByEmailAsync(string email);
     Task<OneOf<AppSuccess, AppError>> CreateAsync(User request, CancellationToken cancellationToken);
     Task<OneOf<AppSuccess, AppError>> UpdateAsync(User user, UpdateUserRequest request, CancellationToken cancellationToken);
 }

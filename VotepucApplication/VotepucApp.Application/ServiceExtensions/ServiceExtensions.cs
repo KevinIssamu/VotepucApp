@@ -2,11 +2,13 @@ using System.Reflection;
 using Domain.UserAggregate.User;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
-using VotepucApp.Application.AuthenticationsServices;
-using VotepucApp.Application.AuthenticationsServices.Interfaces;
 using VotepucApp.Application.BusinessService;
 using VotepucApp.Application.BusinessService.ElectionService;
 using VotepucApp.Application.BusinessService.UserService;
+using VotepucApp.Application.BusinessService.VoteLinkService;
+using VotepucApp.Application.ViewModels;
+using VotepucApp.Services.AuthenticationsServices;
+using VotepucApp.Services.Interfaces;
 
 namespace VotepucApp.Application.ServiceExtensions;
 
@@ -19,8 +21,7 @@ public static class ServiceExtensions
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         
         services.AddTransient<IUserService, UserService>();
-        services.AddTransient<ITokenService, TokenService>();
         services.AddTransient<IElectionService, ElectionService>();
-        services.AddTransient<ClaimsService>();
+        services.AddTransient<VoteLinkService>();
     }
 }

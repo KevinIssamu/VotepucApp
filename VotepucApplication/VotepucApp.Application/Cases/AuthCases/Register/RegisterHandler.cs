@@ -17,7 +17,7 @@ public class RegisterHandler(UserManager<User> userManager) : IRequestHandler<Re
         if (request.Password != request.ConfirmPassword)
             return new GenericResponse(400, "Passwords do not match.");
 
-        var user = User.Factory.Create(request.Name, request.Email, request.Password, null);
+        var user = User.Factory.Create(request.Name, request.Email, null);
         if (user.IsT1)
             return new GenericResponse(400, user.AsT1.Message);
 

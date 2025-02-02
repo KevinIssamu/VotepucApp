@@ -5,6 +5,7 @@ using VotepucApp.Application.Cases.ElectionCases.SelectElection.Requests;
 using VotepucApp.Application.Cases.ElectionCases.SelectElection.Responses;
 using VotepucApp.Application.Cases.UseCases.Shared.Responses;
 using VotepucApp.Application.ViewModels;
+using VotepucApp.Services.Interfaces;
 
 namespace VotepucApp.Application.Cases.ElectionCases.SelectElection.Handlers;
 
@@ -29,7 +30,7 @@ public class SelectElectionsHandler(IElectionService electionService)
 
         var electionViewModel = selectUsersResult.AsT0
             .Select(x => new ElectionViewModel(x.Id, Guid.Parse(x.OwnerId), x.Title, x.Description,
-                x.EmailInvitationText, x.MultiVote, x.Status, x.Progress, x.StartDate, x.EndDate))
+                x.EmailInvitationText, x.MultiVote, x.ElectionStatus, x.Progress, x.StartDate, x.EndDate))
             .ToList();
 
         return new SelectedElectionsResponse(electionViewModel, 200, $"Total elections: {electionViewModel.Count}");

@@ -22,8 +22,5 @@ public class VoteLinkConfiguration : IEntityTypeConfiguration<VoteLink>
             .HasForeignKey(v => v.ElectionId)
             .OnDelete(DeleteBehavior.Cascade)
             .IsRequired();
-        
-        builder.Property(x => x.Token)
-            .IsRequired();
     }
 }

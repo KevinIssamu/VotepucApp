@@ -6,28 +6,42 @@ using Domain.UserAggregate.User;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using OneOf;
-using VotepucApp.Application.Cases.Shared;
-using VotepucApp.Application.Cases.UseCases.CreateUser;
 using VotepucApp.Application.Cases.UseCases.SelectUser.Requests;
-using VotepucApp.Application.Cases.UseCases.Shared.Requests;
-using VotepucApp.Application.Cases.UseCases.Shared.Responses;
 using VotepucApp.Application.Cases.UseCases.UpdateUser;
 
 namespace VotepucApp.Application.BusinessService.UserService;
 
-public class UserService(IUserRepository userRepository, IUnitOfWork unitOfWork, IMediator mediator, UserManager<User> userManager) : IUserService
+public class UserService(IUserRepository userRepository, UserManager<User> userManager) : IUserService
 {
     public async Task<OneOf<AppSuccess, AppError>> CreateAsync(User user, CancellationToken cancellationToken)
     {
+        var newUserResult = await userManager.CreateAsync(user);
+        if (!newUserResult.Succeeded)
+            return new AppError(newUserResult.Errors.ToString(), AppErrorTypeEnum.BusinessRuleValidationFailure);
+
         var createResult = await userRepository.CreateAsync(user, cancellationToken);
-        
+
         return createResult.IsT1 ? createResult.AsT1 : new AppSuccess("User created successfully");
     }
-
-    public async Task<OneOf<User, AppError>> SelectByIdAsync(Guid id,
+    
+    public async Task<OneOf<User, AppError>> SelectByIdTrackingAsync(Guid id,
         CancellationToken cancellationToken)
     {
-        var userExistsResult = await userRepository.SelectByIdAsync(id, cancellationToken);
+        var userExistsResult = await userRepository.SelectByIdTrackingAsync(id, cancellationToken);
+
+        if (userExistsResult.IsT1)
+            return userExistsResult.AsT1;
+
+        if (userExistsResult.AsT0 == null)
+            return new AppError($"User with ID '{id}' was not found.", AppErrorTypeEnum.NotFound);
+
+        return userExistsResult.AsT0;
+    }
+    
+    public async Task<OneOf<User, AppError>> SelectByIdAsNoTrackingAsync(Guid id,
+        CancellationToken cancellationToken)
+    {
+        var userExistsResult = await userRepository.SelectByIdAsNoTrackingAsync(id, cancellationToken);
 
         if (userExistsResult.IsT1)
             return userExistsResult.AsT1;
@@ -46,61 +60,46 @@ public class UserService(IUserRepository userRepository, IUnitOfWork unitOfWork,
         if (userResult.IsT1)
             return userResult.AsT1;
 
-        if (userResult.AsT0.Count == 0)
+        if (userResult.AsT0 == null || userResult.AsT0.Count == 0)
             return new AppError("No users found for the given parameters.", AppErrorTypeEnum.NotFound);
 
         return userResult.AsT0;
     }
 
-    public async Task<OneOf<User, AppError>> SelectByEmailAsync(SelectUserByEmailRequest request,
-        CancellationToken cancellationToken)
+    public async Task<OneOf<User, AppError>> SelectUserByEmailAsync(string email)
     {
-        var userExistsResult = await userRepository.SelectByEmailAsync(request.Email, cancellationToken);
+        var userExistsResult = await userManager.FindByEmailAsync(email);
 
-        if (userExistsResult.IsT1)
-            return userExistsResult.AsT1;
+        if (userExistsResult == null)
+            return new AppError($"User with email '{email}' was not found.", AppErrorTypeEnum.NotFound);
 
-        if (userExistsResult.AsT0 == null)
-            return new AppError($"User with email '{request.Email}' was not found.", AppErrorTypeEnum.NotFound);
-
-        return userExistsResult.AsT0;
+        return userExistsResult;
     }
 
     public async Task<OneOf<List<Election>, AppError>> SelectUserElectionsAsync(SelectUserElectionsRequest request,
         CancellationToken cancellationToken)
     {
-        var userExistsResult = await userRepository.SelectByIdAsync(request.UserId, cancellationToken);
-        
-        if(userExistsResult.IsT1)
-            return userExistsResult.AsT1;
-        
-        if(userExistsResult.AsT0 == null)
-            return new AppError($"User with ID '{request.UserId}' was not found.", AppErrorTypeEnum.NotFound);
-        
         var userElectionsResult =
             await userRepository.SelectUserElections(request.UserId, request.Skip, request.Take, cancellationToken);
 
         if (userElectionsResult.IsT1)
             return userElectionsResult.AsT1;
 
+        if (userElectionsResult.AsT0 != null || userElectionsResult.AsT0.Count == 0)
+            return new AppError("User has no elections.", AppErrorTypeEnum.NotFound);
+        
         return userElectionsResult.AsT0;
-    }
+}
 
-    public async Task<OneOf<AppSuccess, AppError>> DeleteAsync(Guid id,
+    public OneOf<AppSuccess, AppError> Delete(User user,
         CancellationToken cancellationToken)
     {
-        var selectUserByIdResult = await userRepository.SelectByIdAsync(id, cancellationToken);
-
-        if (selectUserByIdResult.IsT1)
-            return selectUserByIdResult.AsT1;
-
-        if (selectUserByIdResult.AsT0 == null)
-            return new AppError($"User with ID '{id}' was not found.", AppErrorTypeEnum.NotFound);
-
-        userRepository.Delete(selectUserByIdResult.AsT0, cancellationToken);
-        await unitOfWork.CommitAsync(cancellationToken);
-
-        return new AppSuccess("User successfully deleted.");
+        var deleteUserResult = userRepository.Delete(user, cancellationToken);
+        
+        if(deleteUserResult.IsT1)
+            return deleteUserResult.AsT1;
+        
+        return deleteUserResult.AsT0;
     }
 
     public async Task<OneOf<AppSuccess, AppError>> UpdateAsync(User user, UpdateUserRequest request,

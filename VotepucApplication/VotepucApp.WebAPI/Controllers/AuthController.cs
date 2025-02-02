@@ -6,147 +6,67 @@ using Microsoft.AspNetCore.Mvc;
 using VotepucApp.Application.Cases.AuthCases;
 using VotepucApp.Application.Cases.AuthCases.AddUserToRole;
 using VotepucApp.Application.Cases.AuthCases.CreateRole;
+using VotepucApp.Application.Cases.AuthCases.DeleteRole;
 using VotepucApp.Application.Cases.AuthCases.Login;
 using VotepucApp.Application.Cases.AuthCases.RefreshToken;
 using VotepucApp.Application.Cases.AuthCases.Register;
 using VotepucApp.Application.Cases.Shared;
+using VotepucApp.Persistence.Context.Seeder.Permissions;
 
 namespace VotepucApp.WebAPI.Controllers;
 
-[Route("api/[controller]")]
-[ApiController]
-public class AuthController(
-    UserManager<User> userManager,
-    IMediator mediator) : ControllerBase
+public class AuthController(UserManager<User> userManager, IMediator mediator) : BaseController
 {
-    [Authorize(Policy = "SuperAdm")]
-    [HttpPost]
-    [Route("CreateRole")]
-    public async Task<IActionResult> CreateRole([FromBody] CreateRoleRequest request)
+    [Authorize(Policy = AuthPermissions.AuthCreateRole)]
+    [HttpPost("CreateRole")]
+    public async Task<ActionResult<GenericResponse>> CreateRole([FromBody] CreateRoleRequest request)
     {
-        var newRoleValidator = new CreateRoleValidator();
+        return await HandleRequest<CreateRoleRequest, GenericResponse>(request, mediator, new RoleNameValidator());
+    }
 
-        var validationResult = await newRoleValidator.ValidateAsync(request);
-
-        if (!validationResult.IsValid)
-        {
-            var responseBadRequest = new GenericResponse(400, validationResult.Errors.ToString());
-            return StatusCode(responseBadRequest.StatusCode, responseBadRequest.Message);
-        }
-
-        var response = await mediator.Send(request);
-
-        return StatusCode(response.StatusCode, response.Message);
+    [Authorize(Policy = AuthPermissions.AuthDeleteRole)]
+    [HttpDelete("DeleteRole")]
+    public async Task<ActionResult<GenericResponse>> DeleteRole([FromBody] DeleteRoleRequest request)
+    {
+        return await HandleRequest<DeleteRoleRequest, GenericResponse>(request, mediator);
     }
     
-    [Authorize(Policy = "SuperAdm")]
-    [HttpPost]
-    [Route("AddUserToRole")]
-    public async Task<IActionResult> AddUserToRole([FromBody] AddUserToRoleRequest request)
+    [Authorize(Policy = AuthPermissions.AuthAddUserToRole)]
+    [HttpPost("AddUserToRole")]
+    public async Task<ActionResult<GenericResponse>> AddUserToRole([FromBody] AddUserToRoleRequest request)
     {
-        var validator = new AddUserToRoleValidator();
-
-        var validationResult = await validator.ValidateAsync(request);
-        if (!validationResult.IsValid)
-        {
-            var responseBadRequest = new GenericResponse(400, validationResult.Errors.ToString());
-            return StatusCode(responseBadRequest.StatusCode, responseBadRequest.Message);
-        }
-
-        var response = await mediator.Send(request);
-
-        return StatusCode(response.StatusCode, response.Message);
+        return await HandleRequest<AddUserToRoleRequest, GenericResponse>(request, mediator, new AddUserToRoleValidator());
     }
     
-    [HttpPost]
-    [Route("Login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
+    [AllowAnonymous]
+    [HttpPost("Login")]
+    public async Task<ActionResult<GenericResponse>> Login([FromBody] LoginRequest loginRequest)
     {
-        var validator = new LoginValidator();
-        var validationResult = await validator.ValidateAsync(loginRequest);
-
-        if (!validationResult.IsValid)
-        {
-            var responseBadRequest =
-                new LoginResponse(null, null, null, 400, validationResult.Errors.ToString()!);
-            return StatusCode(responseBadRequest.StatusCode, responseBadRequest.Message);
-        }
-
-        var response = await mediator.Send(loginRequest);
-
-        if (response.StatusCode is >= 200 and < 300)
-        {
-            return Ok(new
-            {
-                response.Token,
-                response.RefreshToken,
-                response.Expiration,
-                response.Message
-            });
-        }
-        
-        return StatusCode(response.StatusCode, response.Message);
+        return await HandleRequest<LoginRequest, GenericResponse>(loginRequest, mediator, new LoginValidator());
     }
-
-    [HttpPost]
-    [Route("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+    
+    [AllowAnonymous]
+    [HttpPost("Register")]
+    public async Task<ActionResult<GenericResponse>> Register([FromBody] RegisterRequest request)
     {
-        var validator = new RegisterValidator();
-
-        var validationResult = await validator.ValidateAsync(request);
-
-        if (!validationResult.IsValid)
-        {
-            var responseBadRequest = new GenericResponse(400, validationResult.Errors.ToString());
-            return StatusCode(responseBadRequest.StatusCode, responseBadRequest.Message);
-        }
-
-        var response = await mediator.Send(request);
-
-        return StatusCode(response.StatusCode, response.Message);
+        return await HandleRequest<RegisterRequest, GenericResponse>(request, mediator, new RegisterValidator());
     }
-
-    [HttpPost]
-    [Route("refresh-token")]
-    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+    
+    [HttpPost("RefreshToken")]
+    public async Task<ActionResult<GenericResponse>> RefreshToken([FromBody] RefreshTokenRequest request)
     {
-        var validator = new RefreshTokenValidator();
-
-        var validationResult = await validator.ValidateAsync(request);
-
-        if (!validationResult.IsValid)
-        {
-            var responseBadRequest = new GenericResponse(400, validationResult.Errors.ToString());
-            return StatusCode(responseBadRequest.StatusCode, responseBadRequest.Message);
-        }
-
-        var response = await mediator.Send(request);
-        
-        if (response.StatusCode is >= 200 and < 300)
-        {
-            return Ok(new
-            {
-                response.AccessToken,
-                response.RefreshToken,
-                response.Message
-            });
-        }
-        
-        return StatusCode(response.StatusCode, response.Message);
+        return await HandleRequest<RefreshTokenRequest, GenericResponse>(request, mediator, new RefreshTokenValidator());
     }
-
-    [Authorize(Policy = "Adm")]
-    [HttpPost]
-    [Route("revoke/{id:guid}")]
-    public async Task<IActionResult> Revoke(Guid id)
+    
+    [Authorize(Policy = AuthPermissions.AuthRevoke)]
+    [HttpPost("Revoke/{id:guid}")]
+    public async Task<ActionResult<GenericResponse>> Revoke(Guid id)
     {
         var user = await userManager.FindByIdAsync(id.ToString());
-
-        if (user is null) return BadRequest("User not found or invalid.");
+        if (user is null)
+            return BadRequest("User not found or invalid.");
 
         user.RefreshToken = null;
-
         await userManager.UpdateAsync(user);
 
         return NoContent();

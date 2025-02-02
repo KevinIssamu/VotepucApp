@@ -1,6 +1,7 @@
 using Domain.ElectionAggregate.Election;
 using Domain.ElectionAggregate.Participant;
 using Domain.ElectionAggregate.VoteLink;
+using Domain.UserAggregate.Permissions;
 using Domain.UserAggregate.User;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +18,7 @@ public sealed class ReadDbContext : DbContext
     public DbSet<Election> Elections { get; set; }
     public DbSet<Participant> Participants { get; set; }
     public DbSet<VoteLink> VoteLinks { get; set; }
+    public DbSet<Permission> Permissions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

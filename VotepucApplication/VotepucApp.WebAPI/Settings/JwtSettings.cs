@@ -1,4 +1,4 @@
-using VotepucApp.Application.AuthenticationsServices.Interfaces;
+using VotepucApp.Services.Interfaces.ConfigInterfaces;
 
 namespace VotepucApp.WebAPI.Settings;
 

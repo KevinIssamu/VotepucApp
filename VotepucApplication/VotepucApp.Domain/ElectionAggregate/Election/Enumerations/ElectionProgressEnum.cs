@@ -4,5 +4,6 @@ public enum ElectionProgressEnum
 {
     Inactive = 1,
     Active = 2,
-    Finished = 3
+    Finish = 3,
+    Starting = 4,
 }

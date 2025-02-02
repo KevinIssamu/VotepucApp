@@ -1,0 +1,42 @@
+services:
+  api:
+    container_name: votepucapp-api
+    build:
+      dockerfile: Dockerfile
+      context: .
+    ports:
+      - 8080:8080
+    environment:
+      - "ASPNETCORE_ENVIRONMENT=Development"
+    depends_on:
+      sql-server:
+        condition: service_healthy
+    networks:
+      - votepucapp-networks
+
+  sql-server:
+    image: mcr.microsoft.com/mssql/server
+    container_name: votepucapp-db
+    environment:
+      - "ACCEPT_EULA=Y"
+      - "MSSQL_SA_PASSWORD=Kevin#1234"
+      - "MSSQL_PID=Express"
+    volumes:
+      - "votepucdb:/var/opt/mssql"
+    networks:
+      votepucapp-networks:
+        aliases:
+          - "sql"
+    healthcheck:
+      test: ["CMD", "sqlcmd", "-S", "localhost", "-U", "sa", "-P", "Kevin#1234", "-Q", "SELECT 1"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 5s
+
+volumes:
+  votepucdb:
+
+networks:
+  votepucapp-networks:
+    driver: bridge

@@ -13,22 +13,20 @@ namespace Domain.UserAggregate.User;
 public class User : IdentityUser, IAggregateRoot
 {
     public string? RefreshToken { get; set; }
-    public DateTime RefreshTokenExpiryTime { get; set; }
+    public DateTime? RefreshTokenExpiryTime { get; set; }
     public ICollection<Election>? Elections { get; private set; }
     public DateTimeOffset CreateAt { get; init; }
     public DateTimeOffset? UpdatedAt { get; set; }
 
     public static class Factory
     {
-        public static OneOf<User, AppError> Create(string name, string email, string password,
-            ICollection<Election>? elections)
+        public static OneOf<User, AppError> Create(string name, string email,
+            ICollection<Election>? elections = null)
         {
             if (string.IsNullOrWhiteSpace(name))
                 return new AppError("Name cannot be null or empty", AppErrorTypeEnum.BusinessRuleValidationFailure);
             if (string.IsNullOrWhiteSpace(email))
                 return new AppError("Email cannot be null or empty", AppErrorTypeEnum.BusinessRuleValidationFailure);
-            if (string.IsNullOrWhiteSpace(password))
-                return new AppError("Password cannot be null or empty", AppErrorTypeEnum.BusinessRuleValidationFailure);
 
             return name.Length switch
             {
@@ -43,7 +41,6 @@ public class User : IdentityUser, IAggregateRoot
                     Id = Guid.NewGuid().ToString(),
                     UserName = name,
                     Email = email,
-                    PasswordHash = password,
                     CreateAt = DateTimeOffset.Now
                 }
             };

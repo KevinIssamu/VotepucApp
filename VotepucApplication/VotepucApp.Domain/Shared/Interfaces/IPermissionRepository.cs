@@ -9,4 +9,5 @@ public interface IPermissionRepository
     Task<OneOf<AppSuccess.AppSuccess, AppError.AppError>> AddRangePermissionAsync(List<Permission> permissions);
     OneOf<Permission, AppError.AppError> GetPermission(string permissionName);
     Task<OneOf<List<Permission>, AppError.AppError>> GetAllPermissionsAsync();
+    Task<bool> AnyAsync();
 }

@@ -15,10 +15,6 @@ public class Candidate : Participant
 
     public OneOf<AppSuccess, AppError> SetVoted()
     {
-        if (Election.Progress != ElectionProgressEnum.Active)
-            return new AppError("Cannot set vote. Election is not active.",
-                AppErrorTypeEnum.BusinessRuleValidationFailure);
-
         Votes++;
         UpdatedAt = DateTime.Now;
         return new AppSuccess("Vote registered successfully.");

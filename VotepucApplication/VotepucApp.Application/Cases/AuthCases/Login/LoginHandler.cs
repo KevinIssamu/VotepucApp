@@ -3,8 +3,8 @@ using System.Security.Claims;
 using Domain.UserAggregate.User;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using VotepucApp.Application.AuthenticationsServices.Interfaces;
 using VotepucApp.Application.Cases.Shared;
+using VotepucApp.Services.Interfaces.ConfigInterfaces;
 
 namespace VotepucApp.Application.Cases.AuthCases.Login;
 

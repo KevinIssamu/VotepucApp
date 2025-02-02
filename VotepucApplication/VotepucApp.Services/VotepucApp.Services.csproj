@@ -7,9 +7,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Email\" />
-      <Folder Include="RabbitMQ\" />
-      <Folder Include="Redis\" />
+      <PackageReference Include="MassTransit.RabbitMQ" Version="8.3.5-develop.2174" />
+      <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="8.0.12" />
+      <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.12" />
+      <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.0" />
+      <PackageReference Include="StackExchange.Redis" Version="2.8.24" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\VotepucApp.Persistence\VotepucApp.Persistence.csproj" />
     </ItemGroup>
 
 </Project>

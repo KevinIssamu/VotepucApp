@@ -1,22 +1,19 @@
 using MediatR;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using VotepucApp.Application.Cases.Shared;
+using VotepucApp.Persistence.Interfaces;
 
 namespace VotepucApp.Application.Cases.AuthCases.CreateRole;
 
-public class CreateRoleHandler(RoleManager<IdentityRole> roleManager)
-    : IRequestHandler<CreateRoleRequest, GenericResponse>
+public class CreateRoleHandler(IClaimsService claimsService, IConfiguration configuration)
+    : BaseHandler(configuration), IRequestHandler<CreateRoleRequest, GenericResponse>
 {
     public async Task<GenericResponse> Handle(CreateRoleRequest request, CancellationToken cancellationToken)
     {
-        var roleExist = await roleManager.RoleExistsAsync(request.RoleName);
-        if (roleExist)
-            return new GenericResponse(400, "Role already exists.");
+        var roleResult = await claimsService.CreateRoleAsync(request.RoleName);
 
-        var roleResult = await roleManager.CreateAsync(new IdentityRole(request.RoleName));
-
-        return roleResult.Succeeded
-            ? new GenericResponse(200, $"Role {request.RoleName} added successfully.")
-            : new GenericResponse(400, $"Issue adding the new {request.RoleName} role.");
+        return roleResult.IsT1 
+            ? CreateAppErrorResponse(roleResult.AsT1) 
+            : CreateSuccessResponse(roleResult.AsT0.Message);
     }
 }

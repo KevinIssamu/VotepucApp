@@ -2,7 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Domain.UserAggregate.User;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using VotepucApp.Application.AuthenticationsServices.Interfaces;
+using VotepucApp.Services.Interfaces.ConfigInterfaces;
 
 namespace VotepucApp.Application.Cases.AuthCases.RefreshToken;
 
@@ -11,7 +11,7 @@ public class RefreshTokenHandler(ITokenService tokenService, IJwtSettings jwtSet
 {
     public async Task<RefreshTokenResponse> Handle(RefreshTokenRequest request, CancellationToken cancellationToken)
     {
-        var principal = tokenService.GetPrincipalFromExpiredToken(request.AccessToken, jwtSettings);
+        var principal = tokenService.GetPrincipalFromToken(request.AccessToken, jwtSettings);
 
         var username = principal.Identity!.Name;
         var user = await userManager.FindByNameAsync(username!);

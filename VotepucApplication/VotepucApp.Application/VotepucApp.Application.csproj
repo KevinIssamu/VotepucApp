@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\VotepucApp.Domain\VotepucApp.Domain.csproj" />
+      <ProjectReference Include="..\VotepucApp.Services\VotepucApp.Services.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -29,8 +30,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Cases\ElectionCases\DeleteElection\" />
-      <Folder Include="Cases\ElectionCases\SelectElection\Validators\" />
+      <Folder Include="Cases\AuthCases\Shared\" />
     </ItemGroup>
 
 </Project>

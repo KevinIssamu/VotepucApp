@@ -1,58 +1,113 @@
 using Domain.ElectionAggregate.Election;
 using Domain.ElectionAggregate.Election.Enumerations;
-using Domain.Shared.AppError;
 using Domain.Shared.Interfaces;
 using MediatR;
+using Microsoft.Extensions.Configuration;
 using VotepucApp.Application.BusinessService.ElectionService;
 using VotepucApp.Application.BusinessService.VoteLinkService;
 using VotepucApp.Application.Cases.Shared;
+using VotepucApp.Services.RabbitMQ.Events;
+using VotepucApp.Services.RabbitMQ.Interfaces;
 
 namespace VotepucApp.Application.Cases.ElectionCases.UpdateElection.UpdateElectionProgress;
 
-public class UpdateProgressHandler(IElectionService electionService, VoteLinkService voteLinkService, IUnitOfWork unitOfWork)
-    : IRequestHandler<UpdateProgressRequest, GenericResponse>
+public class UpdateProgressHandler(
+    IElectionService electionService,
+    VoteLinkService voteLinkService,
+    IUnitOfWork unitOfWork,
+    IEventPublisher eventPublisher,
+    IConfiguration configuration
+)
+    : BaseHandler(configuration), IRequestHandler<UpdateProgressRequest, GenericResponse>
 {
+    private readonly IConfiguration _configuration = configuration;
+
     public async Task<GenericResponse> Handle(UpdateProgressRequest request, CancellationToken cancellationToken)
     {
-        var electionExistsResult = await electionService.SelectByIdAsync(request.ElectionId, cancellationToken);
+        var electionResult = await electionService.SelectByIdTrackingAsync(request.ElectionId, cancellationToken);
 
-        if (electionExistsResult.IsT1)
+        if (electionResult.IsT1)
+            return CreateAppErrorResponse(electionResult.AsT1, null);
+
+        if (electionResult.AsT0.ElectionStatus != ElectionStatusEnum.Approved)
         {
-            return electionExistsResult.AsT1.Type == AppErrorTypeEnum.SystemError
-                ? new GenericResponse(500, electionExistsResult.AsT1.Message)
-                : new GenericResponse(404, electionExistsResult.AsT1.Message);
+            return new GenericResponse(400, "Election must be approved.",
+            [
+                new Link("change-election-status", $"election/{request.ElectionId}/status", "PATCH", _configuration)
+            ]);
         }
 
-        var election = electionExistsResult.AsT0;
+        var election = electionResult.AsT0;
+
+        return request.Progress switch
+        {
+            ElectionProgressEnum.Active => await HandleActiveElectionAsync(election, cancellationToken),
+            ElectionProgressEnum.Finish => await HandleFinishedElectionAsync(election, cancellationToken),
+            _ => new GenericResponse(400, "Invalid election progress. Only 'Active' and 'Finish' progress are allowed.",
+                null)
+        };
+    }
+
+    private async Task<GenericResponse> HandleActiveElectionAsync(Election election,
+        CancellationToken cancellationToken)
+    {
+        var startingResult = electionService.Starting(election);
+        if (startingResult.IsT1)
+            return CreateAppErrorResponse(startingResult.AsT1);
+
+        var createLinksResult = await voteLinkService.CreateLinks(election, cancellationToken);
+        if (createLinksResult.IsT1)
+            return CreateAppErrorResponse(createLinksResult.AsT1);
         
-        if (request.Progress == ElectionProgressEnum.Active)
+        await unitOfWork.CommitAsync(cancellationToken);
+
+        var sendEmailsEvent = new SendEmailsEvent(Guid.NewGuid(), createLinksResult.AsT0);
+
+        await eventPublisher.Publish(sendEmailsEvent);
+
+        await unitOfWork.CommitAsync(cancellationToken);
+
+        var listLinks = new List<Link>()
         {
-            var approveResult = electionService.Start(election);
-            
-            if (approveResult.IsT1)
-                return new GenericResponse(400, approveResult.AsT1.Message);
+            new("finish-election", $"Election/{election.Id}/finish", "PATCH", _configuration),
+            CreateCrudLink("get", $"election", election.Id.ToString()),
+            CreateCrudLink("delete", $"Election", election.Id.ToString())
+        };
 
-            var createLinksResult = await voteLinkService.CreateLinks(election, cancellationToken);
+        return new GenericResponse(202, $"TaskId: {sendEmailsEvent.TaskId}", listLinks);
+    }
 
-            if (electionExistsResult.IsT1)
-            {
-                return electionExistsResult.AsT1.Type == AppErrorTypeEnum.BusinessRuleValidationFailure
-                    ? new GenericResponse(400, electionExistsResult.AsT1.Message)
-                    : new GenericResponse(500, electionExistsResult.AsT1.Message);
-            }
+    private async Task<GenericResponse> HandleFinishedElectionAsync(Election election,
+        CancellationToken cancellationToken)
+    {
+        var approvedElection = election.GetBehavior<ApprovedElectionBehavior>();
 
-            var electionApproved = (ElectionApproved)election;
-            
-            var updateElection = electionService.UpdateAsync()
-            electionApproved.SetVoteLinks(createLinksResult.AsT0);
-            await unitOfWork.CommitAsync(cancellationToken);
-                    
-            return new GenericResponse(200, approveResult.AsT0.Message);
-        }
+        if (approvedElection.IsT1)
+            return CreateAppErrorResponse(approvedElection.AsT1);
 
-        var finishResult = approvedElection.Finish();
-        return finishResult.IsT1
-            ? new GenericResponse(400, finishResult.AsT1.Message)
-            : new GenericResponse(200, finishResult.AsT0.Message);
+        var finishResult = approvedElection.AsT0.Finish();
+
+        if (finishResult.IsT1)
+            return CreateAppErrorResponse(finishResult.AsT1);
+
+        var voteLinks = await electionService.SelectElectionVoteLinksAsync(election.Id, cancellationToken);
+
+        if (voteLinks.IsT1)
+            return CreateAppErrorResponse(voteLinks.AsT1);
+
+        var invalidateLinksResult = voteLinkService.InvalidateVoteLinks(voteLinks.AsT0);
+
+        if (invalidateLinksResult.IsT1)
+            return CreateAppErrorResponse(invalidateLinksResult.AsT1);
+
+        await unitOfWork.CommitAsync(cancellationToken);
+
+        var listLinks = new List<Link>()
+        {
+            CreateCrudLink("get", "election", election.Id.ToString()),
+            CreateCrudLink("delete", "election", election.Id.ToString())
+        };
+
+        return CreateSuccessResponse(finishResult.AsT0.Message, listLinks);
     }
 }
